@@ -1,0 +1,6 @@
+name = "mcp-zalo-oa"
+command = "./target/release/mcp-zalo-oa"
+args = []
+transport = "stdio"
+env = { ZALO_OA_API_URL = "https://openapi.zalo.me/v2.0/officialaccount", ZALO_OA_ACCESS_TOKEN = "", ZALO_OA_WEBHOOK_SECRET = "", ZALO_OA_WEBHOOK_PORT = "8080", ZALO_OA_REPLY_MODE = "suggest" }
+scopes = ["zalo_oa:read", "zalo_oa:write"]

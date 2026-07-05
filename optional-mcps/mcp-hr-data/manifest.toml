@@ -1,0 +1,6 @@
+name = "mcp-hr-data"
+command = "./target/release/mcp-hr-data"
+args = []
+transport = "stdio"
+env = { HR_DB = "~/.hermes/data/hr.db" }
+scopes = ["hr:read", "hr:write"]

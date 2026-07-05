@@ -1,0 +1,5 @@
+name = "mcp-catalog"
+command = "./target/release/mcp-catalog"
+transport = "stdio"
+env = { CATALOG_DB = "~/.hermes/data/catalog.db" }
+scopes = ["catalog:read"]

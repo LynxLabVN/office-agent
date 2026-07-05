@@ -1,0 +1,13 @@
+name = "mcp-trend-research"
+command = "./target/release/mcp-trend-research"
+args = []
+transport = "stdio"
+env = {
+    TT_RESEARCH_CLIENT_KEY = "",
+    TT_RESEARCH_CLIENT_SECRET = "",
+    YOUTUBE_API_KEY = "",
+    YOUTUBE_CLIENT_ID = "",
+    YOUTUBE_CLIENT_SECRET = "",
+    YOUTUBE_REFRESH_TOKEN = "",
+}
+scopes = ["research:read"]

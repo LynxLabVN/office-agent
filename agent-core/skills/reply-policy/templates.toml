@@ -1,0 +1,22 @@
+# Approved reply templates per platform + scenario.
+# Callers look up templates[platform][scenario].
+
+[youtube.youtube_thank_you]
+text = "Cảm ơn bạn đã ủng hộ! Bạn có thể inbox để được tư vấn thêm nhé."
+labels = ["gratitude", "cta"]
+
+[zalo_oa.zalo_oa_question]
+text = "Dạ, bạn vui lòng để lại câu hỏi, bộ phận tư vấn sẽ hỗ trợ sớm nhất có thể."
+labels = ["acknowledge", "oa"]
+
+[zalo_oa.zalo_oa_human_handoff]
+text = "Bạn vui lòng đợi trong giây lát, nhân viên sẽ tiếp nhận ngay."
+labels = ["handoff", "oa"]
+
+[facebook.social_comment_dm]
+text = "Cảm ơn bạn đã quan tâm! Bạn inbox để mình hỗ trợ chi tiết hơn nhé."
+labels = ["comment", "dm"]
+
+[generic.reject_unsafe]
+text = "Xin lỗi, chúng tôi không thể trả lời yêu cầu này."
+labels = ["reject", "unsafe"]

@@ -1,0 +1,207 @@
+
+<!doctype html>
+<html lang="en" data-theme="hermes-teal" data-mode="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Office Agent</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root[data-theme="hermes-teal"][data-mode="light"]{--bg:#f8fafc;--surface:#fff;--surface-2:#f1f5f9;--fg:#0f172a;--muted:#64748b;--border:#e2e8f0;--accent:#0d9488;--accent-fg:#fff;--secondary:#4f46e5;--secondary-fg:#fff;--success:#16a34a;--warn:#d97706;--danger:#dc2626;--ring:#0d9488;--radius:8px;--density:1}
+:root[data-theme="hermes-teal-large"][data-mode="light"]{--bg:#f8fafc;--surface:#fff;--surface-2:#f1f5f9;--fg:#0f172a;--muted:#64748b;--border:#e2e8f0;--accent:#0d9488;--accent-fg:#fff;--secondary:#4f46e5;--secondary-fg:#fff;--success:#16a34a;--warn:#d97706;--danger:#dc2626;--ring:#0d9488;--radius:14px;--density:1.08}
+:root[data-theme="nous-blue"][data-mode="light"]{--bg:#fff;--surface:#fff;--surface-2:#f5f7fb;--fg:#0a0f1f;--muted:#5a6478;--border:#e2e6ef;--accent:#2563eb;--accent-fg:#fff;--secondary:#7c3aed;--secondary-fg:#fff;--success:#16a34a;--warn:#d97706;--danger:#ef4444;--ring:#2563eb;--radius:10px;--density:1}
+:root[data-theme="midnight"][data-mode="light"]{--bg:#0b1020;--surface:#131a30;--surface-2:#1a2240;--fg:#e8ecf5;--muted:#8b94ad;--border:#232b48;--accent:#7c3aed;--accent-fg:#fff;--secondary:#06b6d4;--secondary-fg:#0b1020;--success:#22c55e;--warn:#f59e0b;--danger:#ef4444;--ring:#7c3aed;--radius:8px;--density:1}
+:root[data-theme="ember"][data-mode="light"]{--bg:#faf7f2;--surface:#fff;--surface-2:#f3ede2;--fg:#1c1917;--muted:#78716c;--border:#e7e0d3;--accent:#ea580c;--accent-fg:#fff;--secondary:#b91c1c;--secondary-fg:#fff;--success:#15803d;--warn:#ca8a04;--danger:#b91c1c;--ring:#ea580c;--radius:6px;--density:1}
+:root[data-theme="mono"][data-mode="light"]{--bg:#fff;--surface:#fff;--surface-2:#f4f4f5;--fg:#09090b;--muted:#71717a;--border:#d4d4d8;--accent:#18181b;--accent-fg:#fff;--secondary:#52525b;--secondary-fg:#fff;--success:#18181b;--warn:#52525b;--danger:#18181b;--ring:#18181b;--radius:0px;--density:1}
+:root[data-theme="cyberpunk"][data-mode="light"]{--bg:#0a0014;--surface:#14002a;--surface-2:#1f003d;--fg:#f5f3ff;--muted:#a78bfa;--border:#4c1d95;--accent:#f0abfc;--accent-fg:#0a0014;--secondary:#22d3ee;--secondary-fg:#0a0014;--success:#4ade80;--warn:#facc15;--danger:#fb7185;--ring:#f0abfc;--radius:4px;--density:1}
+:root[data-theme="rose"][data-mode="light"]{--bg:#fdf2f8;--surface:#fff;--surface-2:#fce7f3;--fg:#1f0a1a;--muted:#8b5a6f;--border:#fbcfe8;--accent:#be185d;--accent-fg:#fff;--secondary:#d97706;--secondary-fg:#fff;--success:#15803d;--warn:#d97706;--danger:#be123c;--ring:#be185d;--radius:12px;--density:1}
+:root[data-mode="dark"]{--bg:#0b1220;--surface:#111a2e;--surface-2:#0e1525;--fg:#e2e8f0;--muted:#94a3b8;--border:#243049;--secondary:#818cf8;--secondary-fg:#0b1220}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif;font-size:calc(14px * var(--density))}
+body{margin:0;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.muted{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 12px;border-radius:var(--radius);font-size:13px;font-weight:500;border:1px solid transparent;transition:all .15s;line-height:1.2;white-space:nowrap;cursor:pointer}
+.btn-primary{background:var(--accent);color:var(--accent-fg)}.btn-primary:hover{filter:brightness(1.07)}
+.btn-ghost{background:transparent;color:var(--fg);border-color:var(--border)}.btn-ghost:hover{background:var(--surface-2)}
+.btn-sm{padding:4px 8px;font-size:12px}.btn-icon{padding:6px}
+.input{background:var(--surface);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);padding:7px 10px;font-size:13px;width:100%;font-family:inherit}
+.input:focus{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 25%,transparent)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.avatar{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;height:100vh;position:sticky;top:0}
+.nav-link{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--radius);color:var(--muted);font-size:13px;font-weight:500;transition:background .12s,color .12s;cursor:pointer}
+.nav-link:hover{background:var(--surface-2);color:var(--fg)}
+.nav-link.active{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);font-weight:600}
+.nav-link svg{flex-shrink:0}
+.nav-group{border-top:1px solid var(--border)}.nav-group:first-of-type{border-top:0}
+.nav-group-head{display:flex;align-items:center;gap:8px;width:100%;padding:12px 10px 4px;background:transparent;border:0;text-align:left;cursor:pointer}
+.nav-group-head .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;flex:1;transition:color .12s}
+.nav-group.active-group .nav-group-head .label{color:var(--accent)}
+.nav-group-head .chev{transition:transform .15s;color:var(--muted)}
+.nav-group.collapsed .nav-group-head .chev{transform:rotate(-90deg)}
+.nav-group-body{display:flex;flex-direction:column;gap:1px;padding:2px 6px 6px}
+.nav-group.collapsed .nav-group-body{display:none}
+.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;position:sticky;top:0;z-index:20}
+.tab{padding:6px 14px;font-size:13px;font-weight:500;border-radius:var(--radius);color:var(--muted);border:0;background:transparent;cursor:pointer}
+.tab.active{background:var(--surface-2);color:var(--fg)}
+.app{display:flex;min-height:100vh}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.content{flex:1;padding:24px 32px;max-width:1280px;width:100%;margin:0 auto}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.page-title{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.page-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.menu{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;min-width:220px;z-index:30}
+.menu-item{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:13px;border-radius:calc(var(--radius) - 2px);cursor:pointer;background:transparent;border:0;width:100%;text-align:left;color:var(--fg)}
+.menu-item:hover{background:var(--surface-2)}
+.launch-card{display:block;padding:24px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);transition:all .15s;cursor:pointer}
+.launch-card:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 6px 20px color-mix(in srgb,var(--accent) 10%,transparent)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.15);font-size:13px;z-index:60;display:flex;align-items:center;gap:10px;animation:slideIn .2s ease}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500;background:var(--surface-2);color:var(--fg);border:1px solid var(--border);white-space:nowrap}
+.badge-accent{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+@media (max-width:1024px){.sidebar{width:64px}.sidebar .nav-label,.sidebar .nav-group-head .label,.sidebar .nav-group-head .chev,.sidebar .profile-name,.sidebar .profile-meta{display:none}.sidebar .nav-link{justify-content:center;padding:8px}.sidebar .nav-group-head{justify-content:center;padding:14px 0 6px}.content{padding:16px 20px}}
+@media (max-width:640px){.sidebar{display:none}.content{padding:12px 14px}.page-title{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="px-4 py-4 flex items-center gap-2" style="border-bottom:1px solid var(--border)">
+<div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--accent)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4"/><path d="M3 17l9 4 9-4"/></svg></div>
+<div class="min-w-0"><div class="font-semibold text-sm">Office Agent</div><div class="text-xs muted">v0.4.2</div></div>
+</div>
+<nav class="flex-1 overflow-y-auto py-2" id="side-nav"></nav>
+<div style="border-top:1px solid var(--border)" class="p-3">
+<div class="relative">
+<button onclick="toggleMenu('profile-menu')" class="w-full flex items-center gap-2 px-2 py-2 rounded-md hover:bg-[var(--surface-2)]" style="background:transparent;border:0;width:100%">
+<div class="avatar" style="background:var(--secondary)">DM</div>
+<div class="flex-1 text-left min-w-0 profile-name"><div class="text-sm font-medium">Dana M.</div><div class="text-xs muted profile-meta">Default profile</div></div>
+<svg class="profile-name" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg>
+</button>
+<div id="profile-menu" class="menu hidden" style="left:8px;right:8px;bottom:calc(100% + 4px)">
+<div class="menu-item"><span class="w-2 h-2 rounded-full" style="background:var(--success);display:inline-block"></span>Default <span class="ml-auto text-xs muted">active</span></div>
+<div class="menu-item"><span class="w-2 h-2 rounded-full" style="background:var(--muted);display:inline-block"></span>Marketing-only</div>
+<div class="menu-item"><span class="w-2 h-2 rounded-full" style="background:var(--muted);display:inline-block"></span>HR-only</div>
+<div style="border-top:1px solid var(--border);margin:4px 0"></div>
+<div class="menu-item" style="color:var(--accent)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New profile</div>
+</div>
+</div>
+</div>
+</aside>
+
+<div class="main">
+<header class="topbar">
+<div class="flex p-1 rounded-md gap-1" style="background:var(--surface-2)">
+<button id="tab-marketing" class="tab" onclick="setDomain('marketing')">Marketing</button>
+<button id="tab-hr" class="tab" onclick="setDomain('hr')">HR</button>
+</div>
+<div class="flex-1 max-w-md relative">
+<svg class="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+<input id="global-search" class="input pl-9" placeholder="Search pieces, candidates, files…" style="padding-left:32px"/>
+</div>
+<div class="ml-auto flex items-center gap-2">
+<div class="relative">
+<button onclick="toggleMenu('theme-menu')" class="btn btn-ghost btn-sm">
+<span id="theme-swatch" style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#0d9488;border:1px solid rgba(0,0,0,.1)"></span>
+<span id="theme-name">Hermes Teal</span>
+<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg>
+</button>
+<div id="theme-menu" class="menu hidden" style="right:0;top:calc(100% + 6px)"></div>
+</div>
+<button onclick="toggleMode()" class="btn btn-ghost btn-icon" title="Toggle dark mode">
+<svg id="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+<svg id="icon-moon" class="hidden" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+<button class="btn btn-ghost btn-icon relative" title="Notifications">
+<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+<span class="absolute top-1 right-1 w-2 h-2 rounded-full" style="background:var(--danger)"></span>
+</button>
+</div>
+</header>
+<main class="content">
+<div class="page-head">
+<div><h1 class="page-title">Welcome back, Dana</h1><p class="page-sub">Pick a workspace to get started.</p></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<a href="marketing-hub.html" class="launch-card">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style="background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)">
+<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="18" rx="1"/><rect x="11" y="3" width="6" height="12" rx="1"/><rect x="19" y="3" width="2" height="8" rx="1"/></svg>
+</div>
+<div class="font-semibold mb-1">Marketing</div>
+<p class="text-sm muted">Pipeline, review, comments, analytics, and the product catalog.</p>
+<div class="mt-4 text-xs muted">8 screens →</div>
+</a>
+<a href="hr-hub.html" class="launch-card">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style="background:color-mix(in srgb,var(--secondary) 15%,transparent);color:var(--secondary)">
+<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/></svg>
+</div>
+<div class="font-semibold mb-1">HR</div>
+<p class="text-sm muted">Jobs, candidate pipeline, scheduling, candidate comms, and hiring reports.</p>
+<div class="mt-4 text-xs muted">6 screens →</div>
+</a>
+<a href="agent-run.html" class="launch-card">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style="background:color-mix(in srgb,var(--warn) 15%,transparent);color:var(--warn)">
+<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+</div>
+<div class="font-semibold mb-1">Settings / Agent</div>
+<p class="text-sm muted">Run, configure, connect, and monitor the Hermes agent itself.</p>
+<div class="mt-4 text-xs muted">4 grouped surfaces →</div>
+</a>
+</div>
+
+<div class="mt-8">
+<h2 class="text-sm font-semibold mb-3 muted">Recent activity</h2>
+<div class="panel" style="border-color:var(--border)">
+<div class="px-4 py-3 flex items-center gap-3 text-sm" style="border-bottom:1px solid var(--border)">
+<div class="avatar" style="background:var(--accent)">MK</div>
+<div class="flex-1 min-w-0"><div><span class="font-medium">Maya K.</span> moved <span class="font-medium">"Summer Glow Routine"</span> to <span class="badge badge-accent">Editing</span></div><div class="text-xs muted">Marketing · 12 min ago</div></div>
+</div>
+<div class="px-4 py-3 flex items-center gap-3 text-sm" style="border-bottom:1px solid var(--border)">
+<div class="avatar" style="background:var(--secondary)">HR</div>
+<div class="flex-1 min-w-0"><div><span class="font-medium">Hieu R.</span> scheduled an interview with <span class="font-medium">Linh Pham</span></div><div class="text-xs muted">HR · 38 min ago</div></div>
+</div>
+<div class="px-4 py-3 flex items-center gap-3 text-sm">
+<div class="avatar" style="background:var(--warn)">⚙</div>
+<div class="flex-1 min-w-0"><div>Cron job <span class="font-medium">nightly-tiktok-reply</span> ran successfully</div><div class="text-xs muted">Agent · 1 h ago</div></div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+<div id="toast-host"></div>
+
+<script>
+const THEMES=[{id:'hermes-teal',name:'Hermes Teal',swatch:['#0d9488','#4f46e5','#f1f5f9']},{id:'hermes-teal-large',name:'Hermes Teal Large',swatch:['#0d9488','#4f46e5','#f1f5f9']},{id:'nous-blue',name:'Nous Blue',swatch:['#2563eb','#7c3aed','#f5f7fb']},{id:'midnight',name:'Midnight',swatch:['#7c3aed','#06b6d4','#131a30']},{id:'ember',name:'Ember',swatch:['#ea580c','#b91c1c','#faf7f2']},{id:'mono',name:'Mono',swatch:['#18181b','#52525b','#fff']},{id:'cyberpunk',name:'Cyberpunk',swatch:['#f0abfc','#22d3ee','#14002a']},{id:'rose',name:'Rosé',swatch:['#be185d','#d97706','#fdf2f8']}];
+const state={theme:localStorage.getItem('oa-theme')||'hermes-teal',mode:localStorage.getItem('oa-mode')||'light',domain:localStorage.getItem('oa-domain')||'marketing',route:'home',collapsed:JSON.parse(localStorage.getItem('oa-collapsed')||'{}')};
+function applyState(){document.documentElement.setAttribute('data-theme',state.theme);document.documentElement.setAttribute('data-mode',state.mode);const t=THEMES.find(x=>x.id===state.theme);document.getElementById('theme-name').textContent=t.name;document.getElementById('theme-swatch').style.background=t.swatch[0];document.getElementById('icon-sun').classList.toggle('hidden',state.mode==='dark');document.getElementById('icon-moon').classList.toggle('hidden',state.mode==='light');document.getElementById('tab-marketing').classList.toggle('active',state.domain==='marketing');document.getElementById('tab-hr').classList.toggle('active',state.domain==='hr');localStorage.setItem('oa-theme',state.theme);localStorage.setItem('oa-mode',state.mode);localStorage.setItem('oa-domain',state.domain)}
+function toggleMode(){state.mode=state.mode==='light'?'dark':'light';applyState()}
+function setTheme(id){state.theme=id;applyState();closeMenus()}
+function setDomain(d){state.domain=d;applyState();renderSidebar()}
+function toggleMenu(id){const m=document.getElementById(id);if(m.classList.contains('hidden')){closeMenus();m.classList.remove('hidden')}else closeMenus()}
+function closeMenus(){document.querySelectorAll('.menu').forEach(m=>m.classList.add('hidden'))}
+document.addEventListener('click',e=>{if(!e.target.closest('.menu')&&!e.target.closest('[onclick^="toggleMenu"]'))closeMenus()});
+function buildThemeMenu(){document.getElementById('theme-menu').innerHTML=THEMES.map(t=>`<button class="menu-item" onclick="setTheme('${t.id}');closeMenus()"><span style="display:inline-flex;gap:2px"><span style="width:12px;height:12px;border-radius:3px;background:${t.swatch[0]}"></span><span style="width:12px;height:12px;border-radius:3px;background:${t.swatch[1]}"></span><span style="width:12px;height:12px;border-radius:3px;background:${t.swatch[2]};border:1px solid rgba(0,0,0,.1)"></span></span><span class="flex-1">${t.name}</span>${t.id===state.theme?'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--accent)"><path d="M5 12l5 5 9-9"/></svg>':''}</button>`).join('')}
+function toast(msg){const h=document.getElementById('toast-host');const t=document.createElement('div');t.className='toast';t.innerHTML=`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--success)"><path d="M5 12l5 5 9-9"/></svg>${msg}`;h.appendChild(t);setTimeout(()=>t.remove(),2400)}
+const ICO={pipeline:'<rect x="3" y="3" width="6" height="18" rx="1"/><rect x="11" y="3" width="6" height="12" rx="1"/><rect x="19" y="3" width="2" height="8" rx="1"/>',review:'<path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>',comments:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',analytics:'<path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/>',catalog:'<path d="M20 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',jobs:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>',people:'<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/>',schedule:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',comms:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',script:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',edit:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/>',publish:'<path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>'};
+const NAV=[
+{id:'marketing',label:'Marketing',items:[
+{href:'marketing-hub.html',label:'Overview',icon:ICO.analytics},
+{href:'marketing-pipeline.html',label:'Pipeline',icon:ICO.pipeline},
+{href:'marketing-script.html',label:'Script',icon:ICO.script},
+{href:'marketing-edit.html',label:'Edit & Preview',icon:ICO.edit},
+{href:'marketing-publish.html',label:'Publish',icon:ICO.publish},
+{href:'marketing-review.html',label:'Review Queue',icon:ICO.review},
+{href:'marketing-comments.html',label:'Comments',icon:ICO.comments},
+{href:'marketing-analytics.html',label:'Analytics',icon:ICO.analytics},
+{href:'marketing-catalog.html',label:'Catalog',icon:ICO.catalog}]},
+{id:'hr',label:'HR',items:[
+{href:'hr-hub.html',label:'Overview',icon:ICO.people},
+{href:'hr-jobs.html',label:'Jobs',icon:ICO.jobs},
+{href:'hr-pipeline.html',label:'Pipeline',icon:ICO.pipeline},
+{href:'hr-candidates.html',label:'Candidates',icon:ICO.people},
+{href:'hr-schedule.html',label:'Schedule',icon:ICO.schedule},
+{href:'hr-comms.html',label:'Comms',icon:ICO.comms},
+{href:'hr-analytics.html',label:'Analytics',icon:ICO.analytics}]},

@@ -1,0 +1,5 @@
+name = "mcp-ledger"
+command = "./target/release/mcp-ledger"
+transport = "stdio"
+env = { LEDGER_DB = "~/.hermes/data/ledger.db" }
+scopes = ["ledger:write", "ledger:read"]

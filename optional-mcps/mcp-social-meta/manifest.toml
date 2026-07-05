@@ -1,0 +1,6 @@
+name = "mcp-social-meta"
+command = "./target/release/mcp-social-meta"
+args = []
+transport = "stdio"
+env = { META_APP_ID = "", META_APP_SECRET = "", META_PAGE_ACCESS_TOKEN = "", META_IG_USER_ID = "" }
+scopes = ["social:write", "social:read"]

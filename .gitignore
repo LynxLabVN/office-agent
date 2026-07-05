@@ -1,0 +1,61 @@
+# --- OS / Editor ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+.cursor/
+.codex/
+.gemini/
+.zed/
+
+# --- Environment / Secrets ---
+.env
+.env.*
+!.env.example
+!.envrc
+
+# --- Node.js (root workspace) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# --- Python (root + general) ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.uv/
+.uv-cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+*.log
+
+# --- Rust (optional-mcps workspace) ---
+optional-mcps/target/
+optional-mcps/Cargo.lock
+
+# --- Hermes / runtime state ---
+.hermes/
+.hermes-bootstrap-complete
+.update-incomplete
+.update-incomplete.lock
+logs/
+data/
+tmp/
+temp_*
+
+# --- Misc scratch / temp files ---
+/0
+/3
+/10
+/concat
+/copy

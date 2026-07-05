@@ -1,0 +1,6 @@
+name = "mcp-social-youtube"
+command = "./target/release/mcp-social-youtube"
+args = []
+transport = "stdio"
+env = { YOUTUBE_CLIENT_ID = "", YOUTUBE_CLIENT_SECRET = "", YOUTUBE_REFRESH_TOKEN = "" }
+scopes = ["social:read", "social:write", "analytics:read"]

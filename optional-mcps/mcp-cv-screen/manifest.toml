@@ -1,0 +1,6 @@
+name = "mcp-cv-screen"
+command = "python"
+args = ["-m", "mcp_cv_screen.server"]
+transport = "stdio"
+env = { WHISPER_MODEL = "base", CV_CACHE_DIR = "~/.hermes/data/cv_cache" }
+scopes = ["hr:read", "hr:write"]

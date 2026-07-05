@@ -1,0 +1,5 @@
+name = "mcp-video-edit"
+command = "./target/release/mcp-video-edit"
+transport = "stdio"
+env = { EDIT_WORKSPACE = "~/.hermes/work" }
+scopes = ["video:write"]

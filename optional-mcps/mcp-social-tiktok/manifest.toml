@@ -1,0 +1,6 @@
+name = "mcp-social-tiktok"
+command = "./target/release/mcp-social-tiktok"
+args = []
+transport = "stdio"
+env = { TIKTOK_CLIENT_KEY = "", TIKTOK_CLIENT_SECRET = "", TIKTOK_ACCESS_TOKEN = "" }
+scopes = ["social:write", "social:read"]

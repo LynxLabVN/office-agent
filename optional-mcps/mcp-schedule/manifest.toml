@@ -1,0 +1,5 @@
+name = "mcp-schedule"
+command = "./target/release/mcp-schedule"
+transport = "stdio"
+env = { CALCOM_API_URL = "https://api.cal.com/v1" }
+scopes = ["schedule:read", "schedule:write"]

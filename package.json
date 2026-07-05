@@ -1,0 +1,13 @@
+{
+  "name": "office-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Marketing + HR agent workspace",
+  "scripts": {
+    "setup:zalo": "hermes-zalo-plugin setup",
+    "gateway": "hermes gateway"
+  },
+  "dependencies": {
+    "hermes-zalo-plugin": "^1.0.0"
+  }
+}
