@@ -1,0 +1,17 @@
+[package]
+name = "desktop-tauri-spike"
+version = "0.1.0"
+description = "Hermes PTY risk spike for Tauri"
+edition = "2021"
+rust-version = "1.78"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+portable-pty = "0.9"
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

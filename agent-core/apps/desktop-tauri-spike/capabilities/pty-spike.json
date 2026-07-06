@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schema.tauri.app/2.0.0/capabilities/pty-spike.json",
+  "identifier": "pty-spike",
+  "description": "PTY spike capability: allow all events and invoke the terminal commands.",
+  "local": true,
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    {
+      "identifier": "core:event:default",
+      "allow": [{"event": "*"}]
+    },
+    {
+      "identifier": "core:invoke:default",
+      "allow": [{"cmd": "*"}]
+    }
+  ]
+}

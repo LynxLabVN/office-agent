@@ -471,7 +471,7 @@ Prints a text kanban of candidates by stage.
 - [ ] `skills/hr/recruitment/SKILL.md` exists and is valid markdown.
 - [ ] File is ≥ 400 lines and covers all 11 states.
 - [ ] JD template has all required fields plus one filled example.
-- [ ] CV rubric has explicit weights (skills 40%, exp 30%, portfolio 20%, edu 10%).
+- [ ] CV rubric has explicit weights (calibrated: skills 35%, exp 35%, portfolio 20%, edu 10%).
 - [ ] Interview flow covers screen → technical → culture fit → offer.
 - [ ] Question bank generator documented (10 questions per round).
 - [ ] All comms templates are written in Vietnamese with placeholders.

@@ -70,6 +70,24 @@ apps/desktop/dist/
 apps/desktop/release/
 apps/desktop/*.tsbuildinfo
 
+# Tauri desktop apps (Phase 6)
+apps/desktop-tauri/build/
+apps/desktop-tauri/dist/
+apps/desktop-tauri/release/
+apps/desktop-tauri/target/
+apps/desktop-tauri/*.tsbuildinfo
+
+# Tauri risk spike (kept separate until Phase 6.7)
+apps/desktop-tauri-spike/dist/
+apps/desktop-tauri-spike/release/
+apps/desktop-tauri-spike/target/
+apps/desktop-tauri-spike/*.tsbuildinfo
+
+# Shared packages build output
+packages/*/dist/
+packages/*/build/
+packages/*/*.tsbuildinfo
+
 # Web UI assets — synced from @nous-research/ui at build time via
 # `npm run sync-assets` (see web/package.json).
 web/public/fonts/

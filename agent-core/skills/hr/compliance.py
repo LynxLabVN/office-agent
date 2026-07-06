@@ -22,7 +22,10 @@ _SI_PATTERN = re.compile(
 )
 _HOURS_PATTERN = re.compile(r"(\d+)\s*(h|giờ)\s*/\s*(ngày|day)", re.IGNORECASE)
 _OVERTIME_PATTERN = re.compile(
-    r"(1\.5\s*x?\s*(lần|x)|2\s*x?\s*(lần|x)|3\s*x?\s*(lần|x)|overtime|làm thêm)",
+    # Require an actual premium rate (1.5x/2x/3x, optionally "lần"/"x"),
+    # not just the bare word "làm thêm"/"overtime" which mentions overtime
+    # without committing to the statutory rates.
+    r"(1\.5\s*x?\s*(?:lần|x)?|[23]\s*x?\s*(?:lần|x))",
     re.IGNORECASE,
 )
 
@@ -49,8 +52,16 @@ def check_offer_compliance(offer_text: str) -> Dict[str, Any]:
         )
     )
 
-    # Contract type specified
-    contract_types = ["xác định thờ hạn", "không xác định thờ hạn", "mùa vụ", "theo mùa vụ"]
+    # Contract type specified (Vietnamese: "thời hạn" = term/duration)
+    contract_types = [
+        "xác định thời hạn",
+        "không xác định thời hạn",
+        "mùa vụ",
+        "theo mùa vụ",
+        "indefinite",
+        "definite",
+        "seasonal",
+    ]
     has_contract_type = any(ct in text for ct in contract_types)
     checks.append(
         ComplianceCheck(

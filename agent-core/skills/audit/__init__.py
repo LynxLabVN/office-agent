@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from .logger import (
     AuditLogger,
+    log_auto_reply,
     log_decision,
     log_mcp_call,
     log_pii_access,
@@ -16,6 +17,7 @@ from .logger import (
 
 __all__ = [
     "AuditLogger",
+    "log_auto_reply",
     "log_decision",
     "log_mcp_call",
     "log_pii_access",
