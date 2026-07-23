@@ -1,4 +1,5 @@
 name = "mcp-trend-research"
+description = "Research trending topics across TikTok Research and YouTube APIs"
 command = "./target/release/mcp-trend-research"
 args = []
 transport = "stdio"

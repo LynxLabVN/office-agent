@@ -1,4 +1,5 @@
 name = "mcp-ledger"
+description = "Record marketing posts and query performance ledger over SQLite"
 command = "./target/release/mcp-ledger"
 transport = "stdio"
 env = { LEDGER_DB = "~/.hermes/data/ledger.db" }

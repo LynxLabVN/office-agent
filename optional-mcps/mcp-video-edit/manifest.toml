@@ -1,4 +1,5 @@
 name = "mcp-video-edit"
+description = "Edit videos via ffmpeg (cut, captions, overlay, music, 9:16, concat)"
 command = "./target/release/mcp-video-edit"
 transport = "stdio"
 env = { EDIT_WORKSPACE = "~/.hermes/work" }

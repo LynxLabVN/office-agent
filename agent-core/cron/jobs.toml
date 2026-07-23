@@ -21,6 +21,15 @@ command = "hermes marketing publish-queue"
 # posts any pieces with scheduled_at <= now
 
 [[jobs]]
+name = "comment-reply-sweep"
+schedule = "*/30 * * * *"       # every 30 min
+command = "hermes marketing reply --dry-run"
+# lists comments on every published piece's posts (mcp-social-*.list_comments)
+# -> skills/reply-policy decide_reply (REPLY_POLICY_MODE, default suggest) ->
+# mcp-social-*.reply_comment / reply on `send`. Runs --dry-run by default; drop
+# the flag once REPLY_POLICY_MODE=auto is vetted to avoid auto-replying spam.
+
+[[jobs]]
 name = "interview-reminder-24h"
 schedule = "0 8 * * *"          # 08:00 daily
 command = "hermes hr remind-interviews"

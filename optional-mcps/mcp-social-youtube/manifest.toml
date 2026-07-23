@@ -1,4 +1,5 @@
 name = "mcp-social-youtube"
+description = "Upload videos, list and reply to comments, and pull analytics on YouTube"
 command = "./target/release/mcp-social-youtube"
 args = []
 transport = "stdio"

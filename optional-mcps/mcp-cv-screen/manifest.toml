@@ -1,4 +1,5 @@
 name = "mcp-cv-screen"
+description = "Screen candidate CVs and summarize applicant portfolios"
 command = "python"
 args = ["-m", "mcp_cv_screen.server"]
 transport = "stdio"

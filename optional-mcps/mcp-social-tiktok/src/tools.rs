@@ -18,6 +18,11 @@ struct HealthResponse {
     name: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct ReplyResponse {
+    comment_id: String,
+}
+
 #[tool(tool_box)]
 impl TikTokServer {
     #[tool(name = "health", description = "Return server health status")]
@@ -71,6 +76,23 @@ impl TikTokServer {
             .await
             .map_err(|e| e.to_string())?;
         serde_json::to_string(&comments).map_err(|e| e.to_string())
+    }
+
+    #[tool(name = "reply_comment", description = "Reply to a TikTok comment")]
+    pub async fn reply_comment(
+        &self,
+        #[tool(param)] comment_id: String,
+        #[tool(param)] text: String,
+    ) -> Result<String, String> {
+        let id = self
+            .client
+            .reply_comment(&comment_id, &text)
+            .await
+            .map_err(|e| e.to_string())?;
+        serde_json::to_string(&ReplyResponse {
+            comment_id: id,
+        })
+        .map_err(|e| e.to_string())
     }
 }
 

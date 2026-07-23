@@ -1,4 +1,5 @@
 name = "mcp-zalo-oa"
+description = "Send and receive messages via a Zalo Official Account"
 command = "./target/release/mcp-zalo-oa"
 args = []
 transport = "stdio"

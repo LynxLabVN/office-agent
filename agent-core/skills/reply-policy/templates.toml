@@ -5,6 +5,10 @@
 text = "Cảm ơn bạn đã ủng hộ! Bạn có thể inbox để được tư vấn thêm nhé."
 labels = ["gratitude", "cta"]
 
+[tiktok.tiktok_thank_you]
+text = "Cảm ơn bạn đã xem và ủng hộ! Nhắn tin cho mình để được tư vấn thêm nhé."
+labels = ["gratitude", "cta"]
+
 [zalo_oa.zalo_oa_question]
 text = "Dạ, bạn vui lòng để lại câu hỏi, bộ phận tư vấn sẽ hỗ trợ sớm nhất có thể."
 labels = ["acknowledge", "oa"]

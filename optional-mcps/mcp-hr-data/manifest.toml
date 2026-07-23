@@ -1,4 +1,5 @@
 name = "mcp-hr-data"
+description = "Read and write HR records (candidates, offers, compliance) over SQLite"
 command = "./target/release/mcp-hr-data"
 args = []
 transport = "stdio"

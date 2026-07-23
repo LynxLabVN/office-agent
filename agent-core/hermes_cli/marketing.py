@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from hermes_cli._domain_shared import (
@@ -406,6 +407,7 @@ def cmd_marketing_publish(args: argparse.Namespace) -> int:
     print(color(f"Publishing piece {piece_id}...", Colors.CYAN))
     # Best-effort platform uploads
     platforms = ["youtube", "meta", "tiktok"]
+    posts: Dict[str, str] = dict(piece.get("posts") or {})
     for platform in platforms:
         result = call_mcp_tool(
             f"mcp-social-{platform}",
@@ -415,6 +417,14 @@ def cmd_marketing_publish(args: argparse.Namespace) -> int:
         )
         msg = result.get("result") if isinstance(result, dict) else str(result)
         print(f"  {platform}: {msg}")
+        # Capture the published post id per platform so the reply sweep can
+        # target it later. upload returns {"video_id": ...} (youtube/tiktok)
+        # or {"media_id": ...} (meta).
+        post_id = _extract_post_id(result)
+        if post_id:
+            posts[platform] = post_id
+    if posts:
+        piece["posts"] = posts
 
     ledger = call_mcp_tool(
         "mcp-ledger",
@@ -433,6 +443,189 @@ def cmd_marketing_publish(args: argparse.Namespace) -> int:
     _transition(piece, "PUBLISH", "Published to enabled platforms and recorded in ledger")
     _save_state(state)
     print(color(f"Piece {piece_id} is now in state PUBLISH.", Colors.GREEN))
+    return 0
+
+
+def _unwrap_mcp_payload(result: Any) -> Any:
+    """Extract the payload from a ``call_mcp_tool`` result.
+
+    MCP tool results arrive as ``{"result": "<json string>"}`` (the tool's
+    JSON-serialized output carried as text). Parse the string when present so
+    callers get the native dict/list. Tolerant of already-parsed payloads and
+    error/fallback shapes.
+    """
+    if isinstance(result, dict):
+        if "error" in result and "result" not in result:
+            return result
+        payload = result.get("result", result)
+    else:
+        payload = result
+    if isinstance(payload, str):
+        text = payload.strip()
+        if not text:
+            return {}
+        try:
+            return json.loads(text)
+        except (json.JSONDecodeError, ValueError):
+            return {"text": text}
+    return payload
+
+
+def _extract_post_id(result: Any) -> str:
+    """Pull the published post id (video_id / media_id) from an upload result."""
+    payload = _unwrap_mcp_payload(result)
+    if isinstance(payload, dict):
+        return str(
+            payload.get("video_id")
+            or payload.get("media_id")
+            or payload.get("publish_id")
+            or ""
+        )
+    return ""
+
+
+# Per-platform MCP reply tool name + reply-policy template mapping.
+# tiktok uses reply_comment (added for parity); meta's tool is `reply`.
+_REPLY_TOOL = {
+    "youtube": "reply_comment",
+    "meta": "reply",
+    "tiktok": "reply_comment",
+}
+# reply-policy templates.toml platform/scenario keys per social MCP.
+_REPLY_TEMPLATE = {
+    "youtube": ("youtube", "youtube_thank_you"),
+    "meta": ("facebook", "social_comment_dm"),
+    "tiktok": ("tiktok", "tiktok_thank_you"),
+}
+
+
+def _load_reply_policy():
+    """Load the reply-policy skill's ``policy`` module.
+
+    The skill directory uses a hyphen (``reply-policy``) so it is not a normal
+    importable package; load ``policy.py`` via importlib from the bundled
+    skills dir instead.
+    """
+    import importlib.util
+    from hermes_constants import get_bundled_skills_dir
+
+    skills_dir = get_bundled_skills_dir(Path(__file__).parent.parent / "skills")
+    policy_path = skills_dir / "reply-policy" / "policy.py"
+    if not policy_path.is_file():
+        raise FileNotFoundError(f"reply-policy policy.py not found at {policy_path}")
+    spec = importlib.util.spec_from_file_location("reply_policy_policy", policy_path)
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    return mod.decide_reply, mod.load_templates
+
+
+def cmd_marketing_reply(args: argparse.Namespace) -> int:
+    """List comments on a piece's published posts and reply per reply-policy.
+
+    For each platform the piece was published to, pull comments, run each
+    through ``skills/reply-policy`` ``decide_reply`` (mode from
+    ``REPLY_POLICY_MODE``, default ``suggest`` = queue for human), and act on
+    the decision: ``send`` -> reply (unless --dry-run), ``queue_human`` ->
+    log, ``drop`` -> skip. Requires the piece to have been published (post ids
+    are recorded on ``cmd_marketing_publish``).
+    """
+    piece_id = getattr(args, "piece_id", None)
+    dry_run = bool(getattr(args, "dry_run", False))
+    state = _load_state()
+    if piece_id:
+        piece = _get_piece(state, piece_id)
+        if not piece:
+            print(color(f"Piece not found: {piece_id}", Colors.RED))
+            return 1
+        pieces = [piece]
+    else:
+        # Sweep every piece that has published post ids.
+        pieces = [p for p in state.get("items", []) if p.get("posts")]
+        if not pieces:
+            print(color(
+                "No pieces with published posts. Run `hermes marketing publish <id>` "
+                "first (post ids are recorded on publish).",
+                Colors.DIM,
+            ))
+            return 0
+
+    try:
+        decide_reply, load_templates = _load_reply_policy()
+    except Exception as exc:
+        print(color(f"reply-policy skill unavailable: {exc}", Colors.RED))
+        return 1
+
+    mode = os.getenv("REPLY_POLICY_MODE", "suggest").lower()
+    templates = load_templates()
+    label = " [dry-run]" if dry_run else ""
+    print(color(f"Reply sweep (mode={mode}){label}...", Colors.CYAN))
+
+    for piece in pieces:
+        posts: Dict[str, str] = dict(piece.get("posts") or {})
+        if not posts:
+            continue
+        print(color(f"Piece {piece.get('id')}:", Colors.CYAN))
+        for platform, video_id in posts.items():
+            if platform not in _REPLY_TOOL:
+                continue
+            print(f"  {platform}: {len(video_id) and video_id[:24]} ...")
+            lc = call_mcp_tool(
+                f"mcp-social-{platform}",
+                "list_comments",
+                {"video_id": video_id, "max_results": 20},
+                fallback={"result": "[]"},
+            )
+            comments = _unwrap_mcp_payload(lc)
+            if not isinstance(comments, list):
+                comments = []
+            if not comments:
+                print(color("    (no comments)", Colors.DIM))
+                continue
+
+            tpl_platform, scenario = _REPLY_TEMPLATE[platform]
+            reply_tool = _REPLY_TOOL[platform]
+            for c in comments:
+                cid = str(c.get("comment_id") or c.get("id") or "")
+                inbound = str(c.get("text") or c.get("content") or "")
+                decision = decide_reply(
+                    inbound,
+                    tpl_platform,
+                    scenario,
+                    mode,
+                    templates,
+                    {"domain": "marketing"},
+                )
+                action = decision.get("action", "drop")
+                reply_text = decision.get("reply") or ""
+                reason = decision.get("reason", "")
+                preview = reply_text[:40] + ("..." if len(reply_text) > 40 else "")
+                if action == "send":
+                    if dry_run:
+                        print(color(
+                            f"    [dry-run] would reply to {cid}: {preview}", Colors.YELLOW,
+                        ))
+                    else:
+                        r = call_mcp_tool(
+                            f"mcp-social-{platform}",
+                            reply_tool,
+                            {"comment_id": cid, "text": reply_text},
+                            fallback={"result": ""},
+                        )
+                        if isinstance(r, dict) and r.get("error"):
+                            print(color(
+                                f"    reply to {cid} FAILED: {r['error']}", Colors.RED,
+                            ))
+                        else:
+                            print(color(
+                                f"    replied to {cid}: {preview}", Colors.GREEN,
+                            ))
+                elif action == "queue_human":
+                    print(color(
+                        f"    queued for human: {cid} ({reason}) reply={preview}", Colors.YELLOW,
+                    ))
+                else:
+                    print(color(f"    dropped {cid}: {reason}", Colors.DIM))
     return 0
 
 
@@ -584,6 +777,18 @@ def build_marketing_parser(subparsers) -> argparse.ArgumentParser:
     sub.add_parser("report", help="Generate weekly performance summary")
     sub.add_parser("publish-queue", help="Publish any pieces with scheduled_at <= now")
 
+    rep = sub.add_parser("reply", help="List comments on a piece's posts and reply per reply-policy")
+    rep.add_argument(
+        "piece_id",
+        nargs="?",
+        help="Piece ID (must have been published). Omit to sweep all pieces with posts.",
+    )
+    rep.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print reply-policy decisions without sending any replies",
+    )
+
     parser.set_defaults(func=cmd_marketing)
     return parser
 
@@ -598,6 +803,7 @@ _COMMANDS: Dict[str, Callable[[argparse.Namespace], int]] = {
     "pull-analytics": cmd_marketing_pull_analytics,
     "report": cmd_marketing_report,
     "publish-queue": cmd_marketing_publish_queue,
+    "reply": cmd_marketing_reply,
 }
 
 

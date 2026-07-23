@@ -219,6 +219,32 @@ impl TikTokClient {
         .await?;
         Ok(data.comments)
     }
+
+    /// Reply to a TikTok comment. Returns the new reply comment id.
+    ///
+    /// `POST /comment/reply/` with JSON `{comment_id, text}`. The response
+    /// carries the new comment id under `reply_id` (tolerant of `comment_id`).
+    pub async fn reply_comment(&self, comment_id: &str, text: &str) -> Result<String> {
+        let body = serde_json::json!({
+            "comment_id": comment_id,
+            "text": text,
+        });
+        let data: serde_json::Value = Self::parse(
+            self.send(
+                self.request(Method::POST, "/comment/reply/")
+                    .json(&body),
+            )
+            .await?,
+        )
+        .await?;
+        let id = data
+            .get("reply_id")
+            .or_else(|| data.get("comment_id"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
+        Ok(id)
+    }
 }
 
 #[cfg(test)]
@@ -362,5 +388,25 @@ mod tests {
         assert_eq!(comments.len(), 1);
         assert_eq!(comments[0].comment_id, "c-1");
         assert_eq!(comments[0].username, "alice");
+    }
+
+    #[tokio::test]
+    async fn test_reply_comment() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST"))
+            .and(path("/comment/reply/"))
+            .and(body_json(serde_json::json!({
+                "comment_id": "c-1",
+                "text": "Thanks!",
+            })))
+            .respond_with(ResponseTemplate::new(200).set_body_json(wrap(serde_json::json!({
+                "reply_id": "r-1",
+            }))))
+            .mount(&server)
+            .await;
+
+        let client = TikTokClient::with_base(test_auth(), server.uri());
+        let id = client.reply_comment("c-1", "Thanks!").await.unwrap();
+        assert_eq!(id, "r-1");
     }
 }

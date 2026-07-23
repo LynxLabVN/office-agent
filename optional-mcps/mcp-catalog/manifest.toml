@@ -1,4 +1,5 @@
 name = "mcp-catalog"
+description = "Search the local product/MCP catalog over SQLite"
 command = "./target/release/mcp-catalog"
 transport = "stdio"
 env = { CATALOG_DB = "~/.hermes/data/catalog.db" }
