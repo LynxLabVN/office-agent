@@ -38,12 +38,25 @@ function rmrf(p) {
 }
 
 function venvPython() {
+  const override = process.env.HERMES_DESKTOP_VENV_PYTHON
+  if (override && fs.existsSync(override)) return override
   if (process.platform === 'win32') {
     const p = path.join(REPO_ROOT, '.venv', 'Scripts', 'python.exe')
-    return fs.existsSync(p) ? p : null
+    if (fs.existsSync(p)) return p
+  } else {
+    const p = path.join(REPO_ROOT, '.venv', 'bin', 'python')
+    if (fs.existsSync(p)) return p
   }
-  const p = path.join(REPO_ROOT, '.venv', 'bin', 'python')
-  return fs.existsSync(p) ? p : null
+  const which = spawnSync(
+    process.platform === 'win32' ? 'where' : 'which',
+    [process.platform === 'win32' ? 'python' : 'python3'],
+    { encoding: 'utf8' }
+  )
+  if (which.status === 0) {
+    const candidate = (which.stdout || '').split(/\r?\n/)[0].trim()
+    if (candidate && fs.existsSync(candidate)) return candidate
+  }
+  return null
 }
 
 function run(cmd, args, opts = {}) {

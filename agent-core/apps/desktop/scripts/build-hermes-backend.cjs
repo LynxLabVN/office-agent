@@ -33,12 +33,28 @@ const PYI_WORK = path.join(BUILD_ROOT, '_pyi_work')
 const MANIFESTS_OUT = path.join(BUILD_ROOT, 'mcp-manifests')
 
 function venvPython() {
+  // 1. Explicit override -- point at any python with hermes_agent installed.
+  const override = process.env.HERMES_DESKTOP_VENV_PYTHON
+  if (override && fs.existsSync(override)) return override
+  // 2. agent-core/.venv (the convention used by install.ps1 / install.sh).
   if (process.platform === 'win32') {
     const p = path.join(REPO_ROOT, '.venv', 'Scripts', 'python.exe')
-    return fs.existsSync(p) ? p : null
+    if (fs.existsSync(p)) return p
+  } else {
+    const p = path.join(REPO_ROOT, '.venv', 'bin', 'python')
+    if (fs.existsSync(p)) return p
   }
-  const p = path.join(REPO_ROOT, '.venv', 'bin', 'python')
-  return fs.existsSync(p) ? p : null
+  // 3. `python` on PATH (last resort; must have hermes_agent importable).
+  const which = spawnSync(
+    process.platform === 'win32' ? 'where' : 'which',
+    [process.platform === 'win32' ? 'python' : 'python3'],
+    { encoding: 'utf8' }
+  )
+  if (which.status === 0) {
+    const candidate = (which.stdout || '').split(/\r?\n/)[0].trim()
+    if (candidate && fs.existsSync(candidate)) return candidate
+  }
+  return null
 }
 
 function rmrf(p) {
