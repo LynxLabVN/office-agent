@@ -21,7 +21,7 @@ echo "==> Install Python 3.13 via uv"
 echo "==> Set up agent-core venv"
 cd "$ROOT_DIR/agent-core"
 "$UV" venv --python 3.13 .venv
-"$UV" pip install -e '.[mcp]'
+"$UV" pip install -e '.[mcp,acp,dev]'
 "$UV" pip install -e '../optional-mcps/mcp-cv-screen'
 
 echo "==> Build web dashboard"

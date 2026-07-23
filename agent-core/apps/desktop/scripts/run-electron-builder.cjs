@@ -36,16 +36,37 @@ function electronBuilderCli() {
 }
 
 const dist = electronDistDir()
+const cliArgs = process.argv.slice(2)
+// Detect target platform from CLI flags (--win / --mac / --linux or bare
+// tokens). Default to host platform when unspecified.
+const targetWin = cliArgs.some((a) => /--win\b|win32\b/i.test(a))
+const targetMac = cliArgs.some((a) => /--mac\b/i.test(a))
+const targetLinux = cliArgs.some((a) => /--linux\b/i.test(a))
+const targetPlatform = targetWin
+  ? "win32"
+  : targetMac
+    ? "darwin"
+    : targetLinux
+      ? "linux"
+      : process.platform
 const args = []
-if (dist && fs.existsSync(distBinary(dist))) {
+// Only reuse the locally installed electron dist when its platform matches
+// the build target. Cross-building (e.g. --win from Linux) must fetch the
+// target-platform electron via @electron/get — the local Linux dist has no
+// electron.exe, so forcing -c.electronDist=<linux dist> yields ENOENT on the
+// rename to Hermes.exe.
+if (dist && targetPlatform === process.platform && fs.existsSync(distBinary(dist))) {
   args.push(`-c.electronDist=${dist}`)
 } else {
   console.warn(
-    "[run-electron-builder] no local electron dist; electron-builder will fetch " +
-      "via @electron/get (electronVersion + ELECTRON_MIRROR)."
+    `[run-electron-builder] ${
+      targetPlatform === process.platform
+        ? "no local electron dist;"
+        : `cross-build (${process.platform} -> ${targetPlatform}); local dist wrong platform;`
+    } electron-builder will fetch via @electron/get (electronVersion + ELECTRON_MIRROR).`
   )
 }
-args.push(...process.argv.slice(2))
+args.push(...cliArgs)
 
 const result = spawnSync(process.execPath, [electronBuilderCli(), ...args], {
   stdio: "inherit",
