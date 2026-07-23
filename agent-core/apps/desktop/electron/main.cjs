@@ -1355,6 +1355,10 @@ function unwrapWindowsVenvHermesCommand(command, backendArgs) {
 const _serveSupportCache = new Map()
 function backendSupportsServe(backend) {
   if (!backend || !backend.command) return true
+  // Bundled PyInstaller backend always supports `serve` (current build) — skip
+  // the source-read/probe to avoid a ~15s `hermes.exe serve --help` probe on
+  // every cold launch of the self-contained app.
+  if (backend.bundled) return true
   const key = `${backend.command}::${backend.root || ''}`
   if (_serveSupportCache.has(key)) return _serveSupportCache.get(key)
 
@@ -1872,6 +1876,18 @@ async function resolveHealedBranch(updateRoot, branch) {
 async function checkUpdates() {
   const updateRoot = resolveUpdateRoot()
   let { branch } = readDesktopUpdateConfig()
+  // Self-contained bundled build: backend is a frozen PyInstaller exe, there
+  // is no source checkout to git-pull, and `hermes update` would try to clone.
+  // Updates ship as new installers — report unsupported with a clear reason.
+  if (isBundledBackend()) {
+    return {
+      supported: false,
+      reason: 'bundled-build',
+      message: 'This is a self-contained build — updates ship as a new installer. Download the latest Hermes installer to update.',
+      hermesRoot: updateRoot,
+      branch
+    }
+  }
   const gitDir = path.join(updateRoot, '.git')
   if (!directoryExists(gitDir)) {
     return {
@@ -2173,6 +2189,9 @@ async function releaseBackendLock(updateRoot, tag) {
 async function applyUpdates(opts = {}) {
   if (updateInFlight) {
     throw new Error('An update is already in progress.')
+  }
+  if (isBundledBackend()) {
+    throw new Error('Self-contained build does not support in-app self-update. Download the latest Hermes installer to update.')
   }
   updateInFlight = true
 
@@ -2904,7 +2923,43 @@ function createActiveBackend(backendArgs) {
   }
 }
 
+// Is the active backend the self-contained PyInstaller bundle (vs a cloned
+// source install)? Mirrors the detection in resolveHermesBackend rung 0 so
+// update gating and other clone-assuming paths can short-circuit.
+function isBundledBackend() {
+  if (!IS_PACKAGED || !process.resourcesPath) return false
+  const exe = path.join(process.resourcesPath, 'hermes-backend', process.platform === 'win32' ? 'hermes.exe' : 'hermes')
+  return fs.existsSync(exe)
+}
+
 function resolveHermesBackend(backendArgs) {
+  // 0. Bundled PyInstaller backend -- self-contained packaged build ships a
+  //    frozen hermes.exe under process.resourcesPath/hermes-backend. Use it
+  //    directly with bootstrap:false so ensureRuntime never clones/venvs. This
+  //    is the canonical path for the self-contained desktop installer; the
+  //    clone-on-first-launch rungs below are the fallback when no bundle ships.
+  if (IS_PACKAGED && process.resourcesPath) {
+    const bundledExe = path.join(process.resourcesPath, 'hermes-backend', process.platform === 'win32' ? 'hermes.exe' : 'hermes')
+    if (fs.existsSync(bundledExe)) {
+      const bundledRoot = path.join(process.resourcesPath, 'hermes-backend')
+      rememberLog(`[backend] using bundled PyInstaller backend at ${bundledExe} (no clone/venv)`)
+      return {
+        label: `bundled Hermes backend at ${bundledExe}`,
+        command: bundledExe,
+        args: backendArgs,
+        bootstrap: false,
+        env: buildDesktopBackendEnv({
+          hermesHome: HERMES_HOME,
+          resourcesDir: process.resourcesPath
+        }),
+        kind: 'command',
+        root: null,
+        bundled: true,
+        shell: false
+      }
+    }
+  }
+
   // 1. Explicit override -- HERMES_DESKTOP_HERMES_ROOT points at a developer
   //    checkout. Honour it as-is (no bootstrap; the user is driving).
   const overrideRoot = process.env.HERMES_DESKTOP_HERMES_ROOT && path.resolve(process.env.HERMES_DESKTOP_HERMES_ROOT)

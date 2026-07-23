@@ -52,6 +52,7 @@ function appendUniquePathEntries(entries, { delimiter = path.delimiter } = {}) {
 function buildDesktopBackendPath({
   hermesHome,
   venvRoot,
+  nativeBinDir,
   currentPath = '',
   platform = process.platform,
   pathModule = pathModuleForPlatform(platform)
@@ -61,7 +62,9 @@ function buildDesktopBackendPath({
   const venvBin = venvRoot ? pathModule.join(venvRoot, platform === 'win32' ? 'Scripts' : 'bin') : null
   const saneEntries = platform === 'win32' ? [] : POSIX_SANE_PATH_ENTRIES
 
-  return appendUniquePathEntries([hermesNodeBin, venvBin, currentPath, saneEntries], { delimiter })
+  // nativeBinDir (bundled ffmpeg.exe / rg.exe) is prepended FIRST so the
+  // self-contained backend finds the shipped native bins before any host copy.
+  return appendUniquePathEntries([nativeBinDir, hermesNodeBin, venvBin, currentPath, saneEntries], { delimiter })
 }
 
 function normalizeHermesHomeRoot(hermesHome, { pathModule = pathModuleForPlatform(process.platform) } = {}) {
@@ -78,6 +81,7 @@ function buildDesktopBackendEnv({
   hermesHome,
   pythonPathEntries = [],
   venvRoot,
+  resourcesDir,
   currentEnv = process.env,
   platform = process.platform,
   pathModule = pathModuleForPlatform(platform)
@@ -85,17 +89,32 @@ function buildDesktopBackendEnv({
   const delimiter = delimiterForPlatform(platform)
   const currentPythonPath = currentEnv?.PYTHONPATH || ''
   const key = pathEnvKey(currentEnv, platform)
+  const nativeBinDir = resourcesDir ? pathModule.join(resourcesDir, 'native-bin') : null
 
-  return {
+  const env = {
     PYTHONPATH: appendUniquePathEntries([...pythonPathEntries, currentPythonPath], { delimiter }),
     [key]: buildDesktopBackendPath({
       hermesHome,
       venvRoot,
+      nativeBinDir,
       currentPath: currentPathValue(currentEnv, platform),
       platform,
       pathModule
     })
   }
+
+  // Expose the bundled resources dir to the Python backend so tools/mcp_sync
+  // can locate bundled MCP exes (resources/mcps) and the manifest catalog
+  // (resources/mcp-manifests) in the self-contained packaged build.
+  if (resourcesDir) {
+    env.HERMES_DESKTOP_RESOURCES = resourcesDir
+    const manifestsDir = pathModule.join(resourcesDir, 'mcp-manifests')
+    // Only override if the bundled manifests dir exists; otherwise let the
+    // Python side fall back to its source-tree / packaged-data resolution.
+    env.HERMES_OPTIONAL_MCPS = manifestsDir
+  }
+
+  return env
 }
 
 module.exports = {

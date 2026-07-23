@@ -19189,6 +19189,14 @@ async def start_gateway(config: Optional[GatewayConfig] = None, replace: bool = 
     except Exception:
         pass
 
+    # Seed bundled MCP servers (linear / unreal-engine / n8n) on gateway start
+    # so the desktop app's MCP surface is populated without `hermes mcp add`.
+    try:
+        from tools.mcp_sync import sync_bundled_mcps
+        sync_bundled_mcps(quiet=True)
+    except Exception:
+        pass
+
     # Centralized logging — agent.log (INFO+), errors.log (WARNING+),
     # and gateway.log (INFO+, gateway-component records only).
     # Idempotent, so repeated calls from AIAgent.__init__ won't duplicate.

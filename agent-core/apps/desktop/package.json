@@ -19,6 +19,7 @@
     "profile:main:cpu": "wait-on http://127.0.0.1:5174 && cross-env XCURSOR_SIZE=24 NODE_OPTIONS=--cpu-prof HERMES_DESKTOP_DEV_SERVER=http://127.0.0.1:5174 electron .",
     "start": "npm run build && electron .",
     "build": "node scripts/assert-root-install.cjs && node scripts/write-build-stamp.cjs && node scripts/stage-native-deps.cjs && tsc -b && vite build && npm run postbuild",
+    "build:bundle": "npm run build && node scripts/stage-native-bin.cjs && node scripts/build-hermes-backend.cjs && node scripts/build-mcps.cjs",
     "postbuild": "node scripts/assert-dist-built.cjs",
     "prebuilder": "node scripts/patch-electron-builder-mac-binary.cjs",
     "builder": "cross-env NODE_OPTIONS=--max-old-space-size=16384 node scripts/run-electron-builder.cjs",
@@ -27,9 +28,9 @@
     "dist:mac": "npm run build && npm run builder -- --mac",
     "dist:mac:dmg": "npm run build && npm run builder -- --mac dmg",
     "dist:mac:zip": "npm run build && npm run builder -- --mac zip",
-    "dist:win": "npm run build && npm run builder -- --win",
-    "dist:win:msi": "npm run build && npm run builder -- --win msi",
-    "dist:win:nsis": "npm run build && npm run builder -- --win nsis",
+    "dist:win": "cross-env HERMES_DESKTOP_TARGET_PLATFORM=win32 npm run build:bundle && npm run builder -- --win",
+    "dist:win:msi": "cross-env HERMES_DESKTOP_TARGET_PLATFORM=win32 npm run build:bundle && npm run builder -- --win msi",
+    "dist:win:nsis": "cross-env HERMES_DESKTOP_TARGET_PLATFORM=win32 npm run build:bundle && npm run builder -- --win nsis",
     "dist:linux": "npm run build && npm run builder -- --linux AppImage deb rpm",
     "test:desktop": "node scripts/test-desktop.mjs",
     "test:desktop:all": "node scripts/test-desktop.mjs all",
@@ -241,7 +242,25 @@
         "nsis",
         "msi"
       ],
-      "signAndEditExecutable": false
+      "signAndEditExecutable": false,
+      "extraResources": [
+        {
+          "from": "build/hermes-backend",
+          "to": "hermes-backend"
+        },
+        {
+          "from": "build/mcp-manifests",
+          "to": "mcp-manifests"
+        },
+        {
+          "from": "build/mcps",
+          "to": "mcps"
+        },
+        {
+          "from": "build/native-bin",
+          "to": "native-bin"
+        }
+      ]
     },
     "linux": {
       "category": "Development",

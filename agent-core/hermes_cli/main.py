@@ -2168,6 +2168,23 @@ def _pin_kanban_board_env() -> None:
         pass
 
 
+def _sync_bundled_mcps_quietly() -> None:
+    """Seed ``~/.hermes/config.yaml`` with bundled optional-mcps on first launch.
+
+    Mirrors _sync_bundled_skills_quietly for MCP servers. The self-contained
+    desktop build ships optional-mcps as remote-HTTP URLs or bundled exes; this
+    registers them so a fresh install sees them without `hermes mcp install`.
+    Idempotent and opt-out (``~/.hermes/.no-bundled-mcps``); failures are
+    swallowed because MCPs are an enhancement, not a hard dependency.
+    """
+    try:
+        from tools.mcp_sync import sync_bundled_mcps
+
+        sync_bundled_mcps(quiet=True)
+    except Exception:
+        pass
+
+
 def _sync_bundled_skills_quietly() -> None:
     """Seed ``~/.hermes/skills/`` with the bundled skill library on first launch.
 
@@ -2413,6 +2430,7 @@ def cmd_chat(args):
 def cmd_gateway(args):
     """Gateway management commands."""
     _sync_bundled_skills_quietly()
+    _sync_bundled_mcps_quietly()
 
     from hermes_cli.gateway import gateway_command
 
@@ -11766,6 +11784,9 @@ def cmd_dashboard(args):
     # cmd_chat does this in its own pre-dispatch block; the dashboard
     # backend is the desktop's primary entrypoint and needs the same.
     _sync_bundled_skills_quietly()
+    # Seed bundled MCP servers (linear / unreal-engine / n8n) so the desktop
+    # GUI's MCP surface is populated on first launch without `hermes mcp add`.
+    _sync_bundled_mcps_quietly()
 
     if "HERMES_WEB_DIST" not in os.environ and not getattr(args, "skip_build", False):
         if not _build_web_ui(PROJECT_ROOT / "web", fatal=True):
