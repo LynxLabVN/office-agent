@@ -1,0 +1,20 @@
+[project]
+name = "office-agent-eir"
+version = "0.1.0"
+description = "eir CLI shim — exposes the Hermes entry points under the `eir` command for office-agent."
+requires-python = ">=3.11"
+# No runtime deps of its own; it just installs console scripts that call into
+# the already-installed hermes-agent package. Installed with --no-deps offline.
+dependencies = []
+
+[project.scripts]
+eir = "hermes_cli.main:main"
+eir-agent = "run_agent:main"
+eir-acp = "acp_adapter.entry:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = []

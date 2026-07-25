@@ -1245,7 +1245,6 @@ hermes_cli/logs.py
 hermes_cli/managed_scope.py
 hermes_cli/managed_uv.py
 hermes_cli/mcp_catalog.py
-hermes_cli/mcp_config.py
 hermes_cli/mcp_picker.py
 hermes_cli/mcp_security.py
 hermes_cli/mcp_startup.py
@@ -1332,7 +1331,6 @@ hermes_cli/subcommands/insights.py
 hermes_cli/subcommands/login.py
 hermes_cli/subcommands/logout.py
 hermes_cli/subcommands/logs.py
-hermes_cli/subcommands/mcp.py
 hermes_cli/subcommands/memory.py
 hermes_cli/subcommands/model.py
 hermes_cli/subcommands/pairing.py

@@ -14,3 +14,5 @@ web/src/contexts/PageHeaderProvider.tsx
 web/src/contexts/page-header-context.ts
 web/src/lib/api.ts
 web/src/plugins/sdk.d.ts
+hermes_cli/mcp_config.py
+hermes_cli/subcommands/mcp.py

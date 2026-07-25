@@ -166,6 +166,10 @@ infographic/
 # 5929 files byte-identical to the Hermes base fork
 # (LynxLabVN/agent-core @ 88d1d62). NOT tracked; restored by:
 #   python tools/provision_base.py
+
+# ── Hermes base files (auto-generated) ──────────────────────────────
+# Files byte-identical to the Hermes base fork (LynxLabVN/agent-core
+# @88d1d62). NOT tracked; restored by:  python tools/provision_base.py
 # BEGIN hermes-base-files
 .dockerignore
 .env.example
@@ -1414,7 +1418,6 @@ hermes_cli/logs.py
 hermes_cli/managed_scope.py
 hermes_cli/managed_uv.py
 hermes_cli/mcp_catalog.py
-hermes_cli/mcp_config.py
 hermes_cli/mcp_picker.py
 hermes_cli/mcp_security.py
 hermes_cli/mcp_startup.py
@@ -1501,7 +1504,6 @@ hermes_cli/subcommands/insights.py
 hermes_cli/subcommands/login.py
 hermes_cli/subcommands/logout.py
 hermes_cli/subcommands/logs.py
-hermes_cli/subcommands/mcp.py
 hermes_cli/subcommands/memory.py
 hermes_cli/subcommands/model.py
 hermes_cli/subcommands/pairing.py
