@@ -550,17 +550,50 @@ mod tests {
     static ENV_LOCK: Mutex<()> = Mutex::new(());
 
     fn mock_bin(dir: &Path, name: &str, script: &str) -> PathBuf {
-        let path = dir.join(name);
-        let mut f = std::fs::File::create(&path).unwrap();
-        f.write_all(script.as_bytes()).unwrap();
+        // Unix: write an executable #!/bin/sh mock.
         #[cfg(unix)]
         {
+            let path = dir.join(name);
+            let mut f = std::fs::File::create(&path).unwrap();
+            f.write_all(script.as_bytes()).unwrap();
             use std::os::unix::fs::PermissionsExt;
             let mut perms = std::fs::metadata(&path).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&path, perms).unwrap();
+            path
         }
-        path
+        // Windows: a #!/bin/sh script is not executable via std::process::Command,
+        // so emit an equivalent .bat instead. The ffprobe mock prints a duration
+        // float; the ffmpeg mock creates the output file (last arg without a `-`).
+        #[cfg(windows)]
+        {
+            let _ = script;
+            let path = dir.join(format!("{name}.bat"));
+            let bat: &str = match name {
+                "ffprobe" => "@echo off\r\necho 10.0\r\n",
+                _ => {
+                    "@echo off\r\n\
+                     setlocal enabledelayedexpansion\r\n\
+                     set \"out=\"\r\n\
+                     :parse\r\n\
+                     if \"%~1\"==\"\" goto exec\r\n\
+                     set \"a=%~1\"\r\n\
+                     if \"!a:~0,1!\"==\"-\" ( shift & goto parse )\r\n\
+                     set \"out=%~1\"\r\n\
+                     shift\r\n\
+                     goto parse\r\n\
+                     :exec\r\n\
+                     if defined out (\r\n\
+                       for %%F in (\"%out%\") do ( if not exist \"%%~dpF\" mkdir \"%%~dpF\" )\r\n\
+                       echo mock> \"%out%\"\r\n\
+                     )\r\n\
+                     endlocal\r\n"
+                }
+            };
+            let mut f = std::fs::File::create(&path).unwrap();
+            f.write_all(bat.as_bytes()).unwrap();
+            path
+        }
     }
 
     fn setup_mocks() -> (tempfile::TempDir, PathBuf, PathBuf) {

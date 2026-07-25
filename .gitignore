@@ -60,3 +60,6 @@ temp_*
 /concat
 /copy
 /.claude
+# office-agent local smoke-test artifacts
+/.hermes-data/
+/optional-mcps/mcp-cv-screen/.cvcache/

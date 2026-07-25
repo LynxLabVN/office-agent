@@ -1,0 +1,16 @@
+.gitignore
+apps/desktop/electron/backend-env.cjs
+apps/desktop/electron/main.cjs
+apps/desktop/package.json
+apps/desktop/scripts/run-electron-builder.cjs
+gateway/run.py
+hermes_cli/config.py
+hermes_cli/main.py
+hermes_cli/web_server.py
+package-lock.json
+package.json
+web/src/App.tsx
+web/src/contexts/PageHeaderProvider.tsx
+web/src/contexts/page-header-context.ts
+web/src/lib/api.ts
+web/src/plugins/sdk.d.ts

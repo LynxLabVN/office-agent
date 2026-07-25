@@ -199,6 +199,13 @@ fn comms_log_path() -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
+
+    // Several tests below mutate process-global env vars (ZALO_OA_COMMS_LOG,
+    // ZALO_OA_REPLY_MODE). Env is a shared singleton, so concurrent tests race
+    // on it. This lock serializes the env-mutating tests to keep the suite
+    // deterministic under parallel execution.
+    static ENV_LOCK: Mutex<()> = Mutex::new(());
 
     #[test]
     fn test_verify_signature_valid() {
@@ -221,6 +228,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_process_inbound_suggest_mode() {
+        let _guard = ENV_LOCK.lock().unwrap();
         std::env::remove_var("ZALO_OA_REPLY_MODE");
         let event = json!({
             "event": "message",
@@ -235,6 +243,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_process_inbound_auto_mode_no_log() {
+        let _guard = ENV_LOCK.lock().unwrap();
         std::env::remove_var("ZALO_OA_COMMS_LOG");
         std::env::set_var("ZALO_OA_REPLY_MODE", "auto");
         let event = json!({
@@ -249,6 +258,7 @@ mod tests {
 
     #[test]
     fn test_within_24h_object_format() {
+        let _guard = ENV_LOCK.lock().unwrap();
         std::env::remove_var("ZALO_OA_COMMS_LOG");
         let tmp = temp_log_path("object");
         let now = Utc::now().to_rfc3339();
@@ -261,6 +271,7 @@ mod tests {
 
     #[test]
     fn test_within_24h_array_format() {
+        let _guard = ENV_LOCK.lock().unwrap();
         std::env::remove_var("ZALO_OA_COMMS_LOG");
         let tmp = temp_log_path("array");
         let now = Utc::now().to_rfc3339();
@@ -280,6 +291,7 @@ mod tests {
 
     #[test]
     fn test_within_24h_old() {
+        let _guard = ENV_LOCK.lock().unwrap();
         std::env::remove_var("ZALO_OA_COMMS_LOG");
         let tmp = temp_log_path("old");
         let old = Utc::now() - chrono::Duration::hours(25);
