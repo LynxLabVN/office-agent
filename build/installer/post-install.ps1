@@ -36,6 +36,8 @@ W-Step "Offline pip install: hermes_agent[mcp] + cv-screen (light)"
 & $VenvPip install --no-index --find-links $Wheels "hermes_agent[mcp]"
 & $VenvPip install --no-index --find-links $Wheels --no-deps (Get-ChildItem "$Wheels\mcp_cv_screen-*.whl" | Select-Object -First 1).FullName
 & $VenvPip install --no-index --find-links $Wheels fastmcp pymupdf pillow httpx anyio
+# `eir` CLI shim — exposes the Hermes entry points as `eir` / `eir-agent` / `eir-acp`.
+& $VenvPip install --no-index --find-links $Wheels --no-deps (Get-ChildItem "$Wheels\office_agent_eir-*.whl" | Select-Object -First 1).FullName
 
 # --- 4. overlay the 81-file office-agent delta onto site-packages -----------
 W-Step "Overlay office-agent delta"
@@ -53,10 +55,12 @@ if (Test-Path $SkillsSrc) {
 # --- 6. write config.yaml (all MCPs pre-registered, enabled) ----------------
 W-Step "Write config.yaml"
 $Tpl = Get-Content (Join-Path $InstallDir "config-template.yaml") -Raw
+# -replace uses regex; backslashes in the replacement string are literal, so no
+# doubling needed (a $ in a path would need escaping as $$, but paths here have none).
 $Cfg = $Tpl `
-    -replace '\{\{INSTALL_DIR\}\}',  ($InstallDir -replace '\\','\\') `
-    -replace '\{\{HERMES_HOME\}\}',  ($HermesHome   -replace '\\','\\') `
-    -replace '\{\{VENV_PY\}\}',      ($VenvPy       -replace '\\','\\')
+    -replace '\{\{INSTALL_DIR\}\}',  $InstallDir `
+    -replace '\{\{HERMES_HOME\}\}',  $HermesHome `
+    -replace '\{\{VENV_PY\}\}',      $VenvPy
 Set-Content -Encoding UTF8 -Path (Join-Path $HermesHome "config.yaml") -Value $Cfg
 
 # --- 7. user env vars --------------------------------------------------------
@@ -72,4 +76,4 @@ if ($DryRun) {
     }
 }
 
-W-Step "Done. Shortcut runs: hermes dashboard --skip-build  (http://127.0.0.1:9119/)"
+W-Step "Done. Shortcut runs: eir dashboard --skip-build  (http://127.0.0.1:9119/)"

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#0f172a"/>
+  <rect x="3" y="3" width="58" height="58" rx="12" fill="none" stroke="#2dd4bf" stroke-width="2"/>
+  <text x="32" y="44" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
+        font-size="38" font-weight="700" text-anchor="middle" fill="#2dd4bf">E</text>
+</svg>

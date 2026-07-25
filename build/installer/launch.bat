@@ -4,5 +4,5 @@ setlocal
 if not defined HERMES_HOME set HERMES_HOME=%LOCALAPPDATA%\hermes
 set PATH=%HERMES_HOME%\venv\Scripts;%PATH%
 title Office Agent
-"%HERMES_HOME%\venv\Scripts\hermes.exe" dashboard --skip-build
+"%HERMES_HOME%\venv\Scripts\eir.exe" dashboard --skip-build
 endlocal

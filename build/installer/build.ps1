@@ -55,10 +55,13 @@ Pop-Location
 Push-Location "$Root\optional-mcps\mcp-cv-screen"
     uv build --wheel --out-dir $Wheels
 Pop-Location
+uv build --wheel --out-dir $Wheels (Join-Path $Inst "eir-shim")
 $baseWheel   = Get-ChildItem "$Wheels\hermes_agent-*.whl" | Select-Object -First 1
 $cvScreenWh  = Get-ChildItem "$Wheels\mcp_cv_screen-*.whl" | Select-Object -First 1
+$eirShimWh   = Get-ChildItem "$Wheels\office_agent_eir-*.whl" | Select-Object -First 1
 Write-Host "  base:   $($baseWheel.Name)"
 Write-Host "  cv-sc:  $($cvScreenWh.Name)"
+Write-Host "  eir:    $($eirShimWh.Name)"
 
 # --- 3. collect offline wheel cache ------------------------------------------
 Write-Step "Collect offline dependency wheels"
