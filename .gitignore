@@ -36,7 +36,10 @@ venv/
 .mypy_cache/
 .ruff_cache/
 dist/
-build/
+# Windows installer: ignore generated artifacts, keep source scripts tracked
+build/installer/payload/
+build/installer/.venv-stage/
+build/installer/requirements-runtime.txt
 *.log
 
 # --- Rust (optional-mcps workspace) ---
