@@ -1,5 +1,6 @@
 use rmcp::serve_server;
 
+mod engine;
 mod ffmpeg;
 mod tools;
 
