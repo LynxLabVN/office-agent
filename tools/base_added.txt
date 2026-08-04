@@ -63,3 +63,4 @@ web/src/pages/marketing/PipelinePage.tsx
 web/src/pages/marketing/PublishConsolePage.tsx
 web/src/pages/marketing/ReviewQueuePage.tsx
 web/src/pages/marketing/ScriptWorkspacePage.tsx
+web/public/favicon.svg

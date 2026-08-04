@@ -66,3 +66,4 @@ temp_*
 # office-agent local smoke-test artifacts
 /.hermes-data/
 /optional-mcps/mcp-cv-screen/.cvcache/
+build/installer/icon.ico

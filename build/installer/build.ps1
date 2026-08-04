@@ -133,6 +133,11 @@ Copy-Item "$Root\tools\provision_base.py" $Payload -Force
 Copy-Item "$Root\tools\base_modified.txt","$Root\tools\base_added.txt" $Payload -Force
 Copy-Item "$Inst\post-install.ps1","$Inst\launch.bat","$Inst\config-template.yaml" $Payload -Force
 
+# --- 5b. installer icon ------------------------------------------------------
+Write-Step "Generate installer icon (icon.ico)"
+& (Join-Path $Stage "Scripts\python.exe") (Join-Path $Inst "make_icon.py")
+Copy-Item (Join-Path $Inst "icon.ico") (Join-Path $Payload "icon.ico") -Force
+
 # --- 6. compile installer ----------------------------------------------------
 Write-Step "Compile installer with Inno Setup"
 $iscc = @(

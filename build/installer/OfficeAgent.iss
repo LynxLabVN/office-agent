@@ -6,6 +6,7 @@
 #define MyAppVersion   "0.1.0"
 #define MyAppPublisher "LynxLabVN"
 #define MyAppExeName   "launch.bat"
+#define MyAppIco       "icon.ico"
 
 [Setup]
 AppId={{8F4A2E1C-3B7D-4E2A-9C1F-OfficeAgent0001}
@@ -25,6 +26,7 @@ OutputDir=dist
 OutputBaseFilename=OfficeAgent-Setup
 LicenseFile=
 SetupLogging=yes
+SetupIconFile={#MyAppIco}
 ; Allow install to per-machine Program Files; venv + user data go to %LOCALAPPDATA%.
 
 [Languages]
@@ -35,9 +37,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Source: "payload\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 
 [Icons]
-Name: "{group}\Office Agent"; Filename: "{app}\launch.bat"; IconFilename: "{app}\python\python.exe"
+Name: "{group}\Office Agent"; Filename: "{app}\launch.bat"; IconFilename: "{app}\{#MyAppIco}"
 Name: "{group}\Uninstall Office Agent"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\Office Agent"; Filename: "{app}\launch.bat"; IconFilename: "{app}\python\python.exe"; Tasks: desktopicon
+Name: "{commondesktop}\Office Agent"; Filename: "{app}\launch.bat"; IconFilename: "{app}\{#MyAppIco}"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
