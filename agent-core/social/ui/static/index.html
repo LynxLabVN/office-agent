@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Social Tool</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 14px/1.4 system-ui, sans-serif; max-width: 880px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 18px; }
+  .warn { background: #fff3cd; color: #664d03; padding: 8px 12px; border-radius: 6px; margin: 12px 0; }
+  .card { border: 1px solid #8884; border-radius: 8px; padding: 12px; margin: 12px 0; }
+  .card h2 { font-size: 15px; margin: 0 0 8px; }
+  label { display: block; margin: 6px 0 2px; font-weight: 600; }
+  input, select, textarea, button { font: inherit; box-sizing: border-box; }
+  input[type=text], input[type=number], select, textarea { width: 100%; padding: 5px; }
+  button { padding: 6px 14px; cursor: pointer; border-radius: 5px; border: 1px solid #8888; background: #2563eb; color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  button.ghost { background: transparent; color: inherit; }
+  #status { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 12px;
+            min-height: 1.2em; margin: 8px 0; padding: 6px; background: #0001; border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+  th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid #8884; vertical-align: top; }
+  .row input { width: 70%; display: inline-block; }
+  small { color: #888; }
+</style>
+</head>
+<body>
+<h1>Social Tool — push video + reply comments (TikTok v1)</h1>
+<div class="warn">
+  ⚠ Browser-UI automation as a normal account violates TikTok/Facebook ToS and risks account lock.
+  Low-volume personal use only. Login once (CLI <code>python -m social login tiktok</code> or the
+  Login button below) to populate the persistent profile.
+</div>
+
+<div id="status"></div>
+
+<div class="card">
+  <h2>1. Login</h2>
+  <label>Platform</label>
+  <select id="login-platform"></select>
+  <div style="margin-top:8px"><button id="btn-login">Open login window</button>
+  <button class="ghost" id="btn-login-status">Check status</button></div>
+</div>
+
+<div class="card">
+  <h2>2. Publish a video</h2>
+  <label>Platform</label>
+  <select id="pub-platform"></select>
+  <label>Video file</label>
+  <input type="file" id="pub-file" accept="video/*">
+  <label>Caption</label>
+  <textarea id="pub-caption" rows="2"></textarea>
+  <label>Tags (comma-separated, no #)</label>
+  <input type="text" id="pub-tags">
+  <label>Privacy</label>
+  <select id="pub-privacy"><option value="">(default)</option><option>public</option><option>followers</option><option>friends</option></select>
+  <div style="margin-top:8px">
+    <label style="display:inline"><input type="checkbox" id="pub-dryrun"> dry-run (walk steps, do not Post)</label>
+  </div>
+  <div style="margin-top:8px"><button id="btn-publish">Publish</button></div>
+</div>
+
+<div class="card">
+  <h2>3. List comments</h2>
+  <label>Platform</label>
+  <select id="com-platform"></select>
+  <label>Video URL</label>
+  <input type="text" id="com-url" placeholder="https://www.tiktok.com/@handle/video/123">
+  <label>Max</label>
+  <input type="number" id="com-max" value="20" min="1" max="200">
+  <div style="margin-top:8px"><button id="btn-comments">List comments</button></div>
+  <table id="com-table" style="display:none">
+    <thead><tr><th>ref</th><th>author</th><th>likes</th><th>text</th><th>reply</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const status = (msg) => { $("status").textContent = msg; };
+
+async function init() {
+  const r = await fetch("/api/platforms").then(r => r.json());
+  const plats = r.platforms || [];
+  for (const id of ["login-platform", "pub-platform", "com-platform"]) {
+    $(id).innerHTML = plats.map(p => `<option>${p}</option>`).join("");
+  }
+}
+
+async function postForm(url, body) {
+  const r = await fetch(url, { method: "POST", body });
+  return r.json();
+}
+
+$("btn-login").onclick = async () => {
+  const p = $("login-platform").value;
+  status(`Opening login window for ${p}...`);
+  const fd = new FormData(); fd.append("platform", p);
+  const r = await postForm("/api/login", fd);
+  status(JSON.stringify(r, null, 2));
+};
+$("btn-login-status").onclick = async () => {
+  const p = $("login-platform").value;
+  const r = await fetch(`/api/login/status?platform=${encodeURIComponent(p)}`).then(r => r.json());
+  status(JSON.stringify(r, null, 2));
+};
+
+$("btn-publish").onclick = async () => {
+  const file = $("pub-file").files[0];
+  if (!file) { status("Pick a video file first."); return; }
+  const fd = new FormData();
+  fd.append("video", file);
+  fd.append("platform", $("pub-platform").value);
+  fd.append("caption", $("pub-caption").value);
+  fd.append("tags", $("pub-tags").value);
+  fd.append("privacy", $("pub-privacy").value);
+  fd.append("dry_run", $("pub-dryrun").checked ? "true" : "false");
+  status("Publishing... (browser opens; do not close it)");
+  const r = await postForm("/api/publish", fd);
+  status(JSON.stringify(r, null, 2));
+};
+
+$("btn-comments").onclick = async () => {
+  const url = $("com-url").value.trim();
+  if (!url) { status("Paste a video URL."); return; }
+  const p = $("com-platform").value;
+  status("Loading comments...");
+  const r = await fetch(`/api/comments?platform=${encodeURIComponent(p)}&video_url=${encodeURIComponent(url)}&max=${$("com-max").value}`).then(r => r.json());
+  if (r.error) { status("Error: " + r.error); return; }
+  const comments = r.comments || [];
+  status(`Loaded ${comments.length} comment(s). Refs expire — reply immediately.`);
+  const tbody = $("com-table").querySelector("tbody");
+  tbody.innerHTML = "";
+  for (const c of comments) {
+    const tr = document.createElement("tr");
+    const ref = c.comment_ref || "";
+    tr.innerHTML = `<td><code>${ref}</code></td><td>${esc(c.author)}</td><td>${esc(c.likes)}</td><td>${esc(c.text)}</td>
+      <td class="row"><input type="text" placeholder="reply text"><button class="ghost">Send</button></td>`;
+    const input = tr.querySelector("input");
+    tr.querySelector("button").onclick = async () => {
+      const text = input.value.trim();
+      if (!text) return;
+      const fd = new FormData(); fd.append("platform", p); fd.append("comment_ref", ref); fd.append("text", text);
+      status(`Replying to ${ref}...`);
+      const rr = await postForm("/api/reply", fd);
+      status(JSON.stringify(rr, null, 2));
+    };
+    tbody.appendChild(tr);
+  }
+  $("com-table").style.display = comments.length ? "table" : "none";
+};
+
+function esc(s) { return (s || "").replace(/[&<>]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;" }[c])); }
+
+init();
+</script>
+</body>
+</html>
