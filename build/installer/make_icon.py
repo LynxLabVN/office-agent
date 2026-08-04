@@ -1,29 +1,27 @@
 """Generate a branded Eir icon.ico (multi-size) for the Inno Setup installer."""
-from PIL import Image, ImageDraw, ImageFont
+from pathlib import Path
+from PIL import Image
 
 
-def make(size: int) -> Image.Image:
-    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    r = max(2, size // 6)
-    d.rounded_rectangle([0, 0, size - 1, size - 1], radius=r, fill=(10, 10, 10, 255))
-    d.rounded_rectangle(
-        [size * 0.04, size * 0.04, size * 0.96, size * 0.96],
-        radius=max(1, r - 2),
-        outline=(45, 212, 191, 255),
-        width=max(1, size // 64),
-    )
-    try:
-        font = ImageFont.truetype("arial.ttf", int(size * 0.62))
-    except Exception:
-        font = ImageFont.load_default()
-    d.text((size * 0.30, size * 0.16), "E", font=font, fill=(45, 212, 191, 255))
-    return img
+ROOT = Path(__file__).resolve().parent.parent.parent
+LOGO_PNG = ROOT / "agent-core" / "apps" / "bootstrap-installer" / "public" / "eir-logo.png"
+OUT_ICO = Path("build/installer/icon.ico")
+
+
+def load_square_logo(size: int) -> Image.Image:
+    """Load the Eir stag logo and fit it into a centered square of the given size."""
+    src = Image.open(LOGO_PNG).convert("RGBA")
+    src_w, src_h = src.size
+    canvas_size = max(src_w, src_h)
+    canvas = Image.new("RGBA", (canvas_size, canvas_size), (0, 0, 0, 0))
+    canvas.paste(src, ((canvas_size - src_w) // 2, (canvas_size - src_h) // 2), src)
+    return canvas.resize((size, size), Image.Resampling.LANCZOS)
 
 
 if __name__ == "__main__":
-    make(256).save(
-        "build/installer/icon.ico",
-        sizes=[(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)],
-    )
-    print("icon.ico written")
+    sizes = [(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)]
+    frames = [load_square_logo(w) for w, h in sizes]
+    OUT_ICO.parent.mkdir(parents=True, exist_ok=True)
+    # Save multi-resolution ICO: first frame is the largest, append smaller sizes.
+    frames[0].save(OUT_ICO, format="ICO", sizes=sizes, append_images=frames[1:])
+    print(f"{OUT_ICO} written")

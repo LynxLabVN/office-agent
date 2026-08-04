@@ -674,9 +674,11 @@ export default function App() {
               >
                 <PluginSlot name="header-left" />
 
-                <Typography className="font-bold text-[1.125rem] leading-[0.95] tracking-[0.0525rem] text-midground uppercase">
-                  Eir
-                </Typography>
+                <img
+                  alt="Eir"
+                  src="/eir-logo.png"
+                  className="h-7 w-auto object-contain opacity-95"
+                />
               </div>
 
               <Button
