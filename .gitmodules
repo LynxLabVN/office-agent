@@ -1,0 +1,4 @@
+[submodule "agent-core"]
+	path = agent-core
+	url = git@github.com:LynxLabVN/agent-core.git
+	branch = office-agent
